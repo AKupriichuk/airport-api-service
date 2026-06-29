@@ -2,6 +2,8 @@
 
 API service for managing airport flights, routes, ticket bookings, and crews. Built with Django REST Framework.
 
+<img width="642" height="538" alt="Screenshot 2026-06-29 at 13 44 56" src="https://github.com/user-attachments/assets/2a910fde-7e2e-43f8-a9d6-e80542628e38" />
+
 
 ## Features
 
