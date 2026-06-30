@@ -16,11 +16,9 @@ class UserSerializer(serializers.ModelSerializer):
         }
 
     def create(self, validated_data):
-        """Створює користувача із захешованим паролем"""
         return get_user_model().objects.create_user(**validated_data)
 
     def update(self, instance, validated_data):
-        """Оновлює користувача, коректно обробляючи пароль"""
         password = validated_data.pop("password", None)
         user = super().update(instance, validated_data)
         if password:

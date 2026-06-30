@@ -31,7 +31,6 @@ class AirplaneTypeViewSet(viewsets.ModelViewSet):
 
 
 class AirplaneViewSet(viewsets.ModelViewSet):
-    # Оптимізуємо: підтягуємо тип літака одним SQL JOIN-запитом
     queryset = Airplane.objects.select_related("airplane_type")
     serializer_class = AirplaneSerializer
 
@@ -44,8 +43,6 @@ class AirportViewSet(viewsets.ModelViewSet):
 class RouteViewSet(viewsets.ModelViewSet):
     queryset = Route.objects.select_related("source", "destination")
 
-    # Якщо користувач просто дивиться список або конкретний маршрут — показуємо деталі.
-    # Якщо створює новий (POST) — використовуємо базовий серіалізатор.
     def get_serializer_class(self):
         if self.action in ("list", "retrieve"):
             return RouteDetailSerializer
@@ -71,24 +68,19 @@ class FlightViewSet(viewsets.ModelViewSet):
         if self.action == "retrieve":
             queryset = queryset.prefetch_related("tickets")
 
-        def get_queryset(self):
-            queryset = self.queryset
+        source = self.request.query_params.get("source")
+        destination = self.request.query_params.get("destination")
+        date = self.request.query_params.get("date")
 
-            source = self.request.query_params.get("source")
-            destination = self.request.query_params.get("destination")
-            date = self.request.query_params.get("date")
+        if source:
+            queryset = queryset.filter(route__source__name__icontains=source)
+        if destination:
+            queryset = queryset.filter(route__destination__name__icontains=destination)
+        if date:
+            date_obj = datetime.strptime(date, "%Y-%m-%d").date()
+            queryset = queryset.filter(departure_time__date=date_obj)
 
-            if source:
-                queryset = queryset.filter(route__source__name__icontains=source)
-            if destination:
-                queryset = queryset.filter(route__destination__name__icontains=destination)
-            if date:
-                date_obj = datetime.strptime(date, "%Y-%m-%d").date()
-                queryset = queryset.filter(departure_time__date=date_obj)
-
-            return queryset.distinct()
-
-        return queryset
+        return queryset.distinct()
 
     def get_serializer_class(self):
         if self.action == "list":
